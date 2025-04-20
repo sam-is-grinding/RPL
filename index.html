@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://unpkg.com/alpinejs" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <div x-data="app()" x-init="init()">
+    <!-- Toggle Form -->
+    <button @click="showRegister = !showRegister">
+      <span x-text="showRegister ? 'Ke Login' : 'Ke Register'"></span>
+    </button>
+
+    <!-- Form Register -->
+    <div x-show="showRegister">
+      <h2>Register</h2>
+      <input type="text" x-model="registerForm.username" placeholder="Username">
+      <input type="password" x-model="registerForm.password" placeholder="Password">
+      <select x-model="registerForm.role">
+        <option value="mahasiswa">Mahasiswa</option>
+        <option value="dosen">Dosen</option>
+      </select>
+      <button @click="register">Daftar</button>
+    </div>
+    <!-- Form Login -->
+    <div x-show="!isLoggedIn">
+      <h2>Login</h2>
+      <input type="text" x-model="loginForm.username" placeholder="Username">
+      <input type="password" x-model="loginForm.password" placeholder="Password">
+      <button @click="login">Login</button>
+    </div>
+
+    <!-- Form Jadwal -->
+    <div x-show="isLoggedIn">
+      <h2>Buat Jadwal Bimbingan</h2>
+      <input type="date" x-model="jadwalForm.tanggal">
+      <input type="time" x-model="jadwalForm.waktu_mulai">
+      <input type="time" x-model="jadwalForm.waktu_selesai">
+      <button @click="buatJadwal">Buat</button>
+      <button @click="isLoggedIn = false">Logout</button>
+    </div>
+
+    <!-- Status -->
+    <div x-text="statusMessage"></div>
+  </div>
+
+  <script>
+    function app() {
+      return {
+        showRegister: false,
+        isLoggedIn: false,
+        currentUser: null,
+        loginForm: { username: '', password: '' },
+        registerForm: { username: '', password: '', role: 'mahasiswa' },
+        statusMessage: '',
+
+        async register() {
+          try {
+            const response = await axios.post('http://localhost:3000/register', this.registerForm);
+            this.statusMessage = 'Registrasi berhasil! Silakan login';
+            this.showRegister = false;
+            this.registerForm = { username: '', password: '', role: 'mahasiswa' };
+          } catch (error) {
+            this.statusMessage = 'Registrasi gagal: ' + error.response.data;
+          }
+        },
+        
+        async login() {
+          try {
+            const response = await axios.post('http://localhost:3000/login', this.loginForm);
+            this.isLoggedIn = true;
+            this.currentUser = response.data.user;
+            this.statusMessage = 'Login berhasil!';
+          } catch (error) {
+            this.statusMessage = 'Login gagal: ' + error.response.data;
+          }
+        },
+        
+        async buatJadwal() {
+          const data = {
+            userId: this.currentUser.id,
+            ...this.jadwalForm
+          };
+          
+          try {
+            await axios.post('http://localhost:3000/jadwal', data);
+            this.statusMessage = 'Jadwal berhasil dibuat!';
+            this.jadwalForm = { tanggal: '', waktu_mulai: '', waktu_selesai: '' };
+          } catch (error) {
+            this.statusMessage = 'Gagal buat jadwal: ' + error.response.data;
+          }
+        },
+        
+        init() {
+          // Cek session sederhana
+          axios.get('/check-auth').catch(() => { /* implementasi opsional */ });
+        }
+      }
+    }
+  </script>
+</body>
+</html>
