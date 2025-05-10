@@ -65,7 +65,9 @@ Repositori ini berisi aplikasi full-stack sederhana menggunakan **Node.js**, **E
    DELETE FROM jadwal WHERE tanggal < CURDATE();
 
 ## 2. Sesuaikan Kode
-Buka file index.js dan atur konfigurasi koneksi database sesuai host/user/password/database-mu:
+Buka file index.js dan atur konfigurasi koneksi database sesuai host/user/password/database:
+
+```javascript
 const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',            // Ganti jika berbeda
@@ -75,6 +77,7 @@ const pool = mysql.createPool({
   waitForConnections: true
 });
 
+```
 ## 3. Install Dependencies
 Di terminal VScode projek run `npm install axios bcrypt cors express mysql2`
 
