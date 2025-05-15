@@ -54,7 +54,7 @@ app.post('/login', (req, res) => {
       }
       
       const user = results[0];
-      const isMatch = await bcrypt.compare(password, user.password);
+      const isMatch = await bcrypt.compare(password, user.PASSWORD);
       
       if (!isMatch) return res.status(400).send('Password salah');
       
@@ -63,7 +63,7 @@ app.post('/login', (req, res) => {
         user: {
           id: user.id,
           username: user.username,
-          role: user.role
+          role: user.ROLE
         }
       });
     }
