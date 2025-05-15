@@ -4,18 +4,20 @@ const cors = require('cors');
 const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
 
+require('dotenv').config()
+
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
 // Koneksi database sederhana
 const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '12345',
-  database: 'bimbingan_kampus_baru',
-  port: 3307,
-  waitForConnections: true
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT,
+  waitForConnections: true,
 });
 
 // REGISTER
