@@ -12,14 +12,15 @@ app.use(bodyParser.json());
 const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
-  password: 'root',
-  database: 'bimbingan_kampus',
-  port: 3306,
+  password: '12345',
+  database: 'bimbingan_kampus_baru',
+  port: 3307,
   waitForConnections: true
 });
 
 // REGISTER
 app.post('/register', async (req, res) => {
+    const hashedPassword = await bcrypt.hash('123456', 8);
   const { username, password, role } = req.body;
   
   try {
