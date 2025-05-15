@@ -3,7 +3,6 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
-const sequelize = require('./connection');
 
 require('dotenv').config()
 
@@ -11,21 +10,6 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
-
-async function initializeDatabase() {
-  try {
-    await sequelize.authenticate();
-    console.log('Database connection established successfully.');
-    
-    // Sync models (use carefully in production)
-    // await sequelize.sync();
-  } catch (error) {
-    console.error('Database connection failed:', error);
-    process.exit(1);
-  }
-}
-
-initializeDatabase();
 
 // Koneksi database sederhana
 const pool = mysql.createPool({
