@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f4f8;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: #2c5282;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .auth-box {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .tab-switcher {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 8px;
+            background: #e2e8f0;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .tab-button.active {
+            background: #2c5282;
+            color: white;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+        }
+
+        .button {
+            background-color: #2c5282;
+            color: white;
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .jadwal-page {
+            width: 100%;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .jadwal-form {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        .nav-button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            background: #f0f4f8;
+            color: #2c5282;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-button:hover {
+            background: #2c5282;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .active-nav {
+            background: #2c5282 !important;
+            color: white !important;
+        }
+
+        .jadwal-container, .verifikasi-container {
+            display: grid;
+            gap: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .verif-header {
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .jadwal-card, .verif-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+
+        .jadwal-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .jadwal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .jadwal-item, .verif-item {
+            background: white;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .jadwal-detail, .verif-detail {
+            display: grid;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8em;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        
+        .status-badge.sedang-verifikasi {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status.telah-verifikasi {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .action-btn {
+            padding: 0.5rem 1.25rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+
+        .approve {
+            background: #38a169;
+            color: white;
+        }
+
+        .approve-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .reject {
+            background: #e53e3e;
+            color: white;
+        }
+        
+        .reject-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .jadwal-time {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .jadwal-meta {
+            margin-top: 0.5rem;
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+        
+        .jadwal-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .date {
+            font-weight: 600;
+            color: #2c5282;
+        }
+
+        .time {
+            color: #4a5568;
+        }
+
+        .section-title {
+            text-align: center;
+            color: #2c5282;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-content textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .edit-btn { background: #4299e1; color: white; }
+        .delete-btn { background: #f56565; color: white; }
+
+    </style>
+</head>
+<body>
+    <div x-data="app()">
+        <!-- Halaman Auth -->
+        <template x-if="!isLoggedIn">
+            <div class="container">
+                <div class="auth-box">
+                    <div class="tab-switcher">
+                        <button 
+                            class="tab-button" 
+                            :class="activeTab === 'login' ? 'active' : ''"
+                            @click="activeTab = 'login'"
+                        >
+                            Login
+                        </button>
+                        <button 
+                            class="tab-button"
+                            :class="activeTab === 'register' ? 'active' : ''"
+                            @click="activeTab = 'register'"
+                        >
+                            Register
+                        </button>
+                    </div>
+
+                    <!-- Form Login -->
+                    <form x-show="activeTab === 'login'" @submit.prevent="login">
+                        <div class="input-group">
+                            <label>ID Perguruan</label>
+                            <input type="text" x-model="loginData.username" required>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Password</label>
+                            <input type="password" x-model="loginData.password" required>
+                        </div>
+
+                        <button type="submit" class="button">Masuk</button>
+                    </form>
+
+                    <!-- Form Register -->
+                    <form x-show="activeTab === 'register'" @submit.prevent="register">
+                        <div class="input-group">
+                            <label>ID Perguruan</label>
+                            <input type="text" x-model="registerData.username" required>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Password</label>
+                            <input type="password" x-model="registerData.password" required>
+                        </div>
+
+                        <button type="submit" class="button">Daftar</button>
+                    </form>
+                </div>
+            </div>
+        </template>
+
+        <!-- Halaman Setelah Login -->
+        <template x-if="isLoggedIn">
+            <div>
+                <!-- Header Navigasi -->
+                <div class="header">
+                    <div class="nav-container">
+                        <h2>IPB University - Sistem Bimbingan</h2>
+                        <div class="nav-menu">
+                            <!-- Untuk Dosen -->
+                            <button 
+                                @click="activePage = 'bimbingan'" 
+                                class="nav-button"
+                                :class="{ 'active-nav': activePage === 'bimbingan' }"
+                                x-show="currentUser.role === 'dosen'"
+                            >
+                                👥 Bimbingan Saya
+                            </button>
+                            
+                            <!-- Untuk Mahasiswa -->
+                            <button 
+                                @click="activePage = 'jadwal'" 
+                                class="nav-button"
+                                :class="{ 'active-nav': activePage === 'jadwal' }"
+                                x-show="currentUser.role === 'mahasiswa'"
+                            >
+                                📅 Jadwal Saya
+                            </button>
+
+                            <!-- Tombol Aksi Utama -->
+                            <button 
+                                @click="currentUser.role === 'mahasiswa' ? activePage = 'buat-jadwal' : activePage = 'verifikasi'"
+                                class="nav-button"
+                                :class="{ 'active-nav': activePage === 'buat-jadwal' || activePage === 'verifikasi' }"
+                            >
+                                <span x-text="currentUser.role === 'mahasiswa' ? '✏️ Buat Jadwal' : '✅ Verifikasi'"></span>
+                            </button>
+
+                            <button @click="logout" class="nav-button logout-btn">
+                                🔒 Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Konten Utama -->
+                <div class="container">
+                    <!-- Halaman Bimbingan Dosen -->
+                    <div x-show="activePage === 'bimbingan' && currentUser.role === 'dosen'" class="main-container">
+                        <h3 class="section-title">Jadwal Mahasiswa Bimbingan</h3>
+                        <div class="jadwal-container">
+                            <template x-for="b in bimbinganList" :key="b.id">
+                            <div class="jadwal-card">
+                                <div class="jadwal-header">
+                                <h4 x-text="b.mahasiswa"></h4>
+                                <span class="status-badge" x-text="b.status"></span>
+                                </div>
+                                <div class="jadwal-content">
+                                <div class="jadwal-time">
+                                    <span class="date" x-text="new Date(b.tanggal).toLocaleDateString('id-ID')"></span>
+                                    <span class="time" x-text="b.waktu_mulai + ' - ' + b.waktu_selesai"></span>
+                                </div>
+                                <div class="jadwal-meta">
+                                    <!-- Perbaiki field penyelenggaraan -->
+                                    <span x-text="'Cara: ' + b.penyelenggaraan"></span>
+                                    <p x-text="'Deskripsi: ' + b.deskripsi"></p>
+                                    <p x-text="'Komentar: ' + (b.komentar_mahasiswa || '-')"></p>
+                                    <p x-text="'Catatan Dosen: ' + (b.komentar_dosen || '-')"></p>
+                                </div>
+                                </div>
+                            </div>
+                            </template>
+                        </div>
+                    </div>
+                    <!-- Halaman Jadwal Mahasiswa -->
+                    <div x-show="activePage === 'jadwal' && currentUser.role === 'mahasiswa'" class="main-container">
+                        <h3 class="section-title">Jadwal Saya</h3>
+                        <div class="jadwal-container">
+                            <template x-for="j in jadwalList" :key="j.id">
+                                <div class="jadwal-card">
+                                    <div class="jadwal-header">
+                                        <h4>Jadwal Bimbingan</h4>
+                                        <span class="status-badge" :class="j.status.toLowerCase()" 
+                                            x-text="j.status"></span>
+                                    </div>
+                                    <div class="action-buttons">
+                                        <button 
+                                            x-show="j.status === 'Sedang Verifikasi'"
+                                            @click="openEditModal(j)"
+                                            class="action-btn edit-btn"
+                                        >          
+                                        ✏️ Edit
+                                        </button>
+
+                                        <button 
+                                            x-show="j.status === 'Sedang Verifikasi'"
+                                            @click="deleteJadwal(j.id)"
+                                            class="action-btn delete-btn"
+                                        >
+                                        🗑️ Hapus
+                                        </button>
+                                    </div>
+                                    <div class="jadwal-content">
+                                        <div class="jadwal-time">
+                                            <span class="date" x-text="new Date(j.tanggal).toLocaleDateString('id-ID')"></span>
+                                            <span class="time" x-text="j.waktu_mulai + ' - ' + j.waktu_selesai"></span>
+                                        </div>
+                                    </div>
+                                    <div class="jadwal-meta">
+                                        <span x-text="'Cara: ' + j.penyelenggaraan"></span>
+                                        <p x-text="'Deskripsi: ' + j.deskripsi"></p>
+                                        <p x-text="'Komentar: ' + (j.komentar_mahasiswa || '')"></p>
+                                        <p x-text="'Catatan Dosen: ' + (j.komentar_dosen || '')"></p>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Halaman Buat Jadwal -->
+                    <div x-show="activePage === 'buat-jadwal' && currentUser.role === 'mahasiswa'" class="jadwal-form">
+                        <form @submit.prevent="buatJadwal">
+                            <div class="input-group">
+                                <label>Tanggal</label>
+                                <input type="date" x-model="jadwalForm.tanggal" required>
+                            </div>
+
+                            <div class="input-group">
+                                <label>Waktu Mulai</label>
+                                <input type="time" x-model="jadwalForm.waktu_mulai" required>
+                            </div>
+
+                            <div class="input-group">
+                                <label>Waktu Selesai</label>
+                                <input type="time" x-model="jadwalForm.waktu_selesai" required>
+                            </div>
+
+                            <div class="input-group">
+                                <label>Cara Penyelenggaraan</label>
+                                <select x-model="jadwalForm.penyelenggaraan" required>
+                                    <option value="Online">Online</option>
+                                    <option value="Offline">Offline</option>
+                                </select>
+                            </div>
+
+                            <div class="input-group">
+                                <label>Deskripsi</label>
+                                <textarea x-model="jadwalForm.deskripsi" required></textarea>
+                            </div>
+
+                            <div class="input-group">
+                                <label>Komentar Mahasiswa</label>
+                                <input type="text" x-model="jadwalForm.komentar_mahasiswa">
+                            </div>
+
+                            <div class="input-group">
+                                <label>Pilih Dosen Pembimbing</label>
+                                <select x-model="jadwalForm.supervisor_id" required>
+                                    <template x-for="dosen in listDosen" :key="dosen.id">
+                                        <option :value="dosen.id" x-text="dosen.username"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="button">Buat Jadwal</button>
+                        </form>
+                    </div>
+
+                    <!-- Halaman Verifikasi Dosen -->
+                    <div x-show="activePage === 'verifikasi' && currentUser.role === 'dosen'" class="main-container">
+                        <h3 class="section-title">Verifikasi Jadwal</h3>
+                        <div class="verifikasi-container">
+                            <template x-for="v in verifList" :key="v.id">
+                                <div class="verif-card">
+                                    <div class="verif-header">
+                                        <h4 x-text="v.mahasiswa"></h4>
+                                    </div>
+                                    <div class="verif-content">
+                                        <div class="verif-time">
+                                            <span x-text="new Date(v.tanggal).toLocaleDateString('id-ID')"></span>
+                                            <span x-text="v.waktu_mulai + ' - ' + v.waktu_selesai"></span>
+                                        </div>
+                                        <div class="action-buttons">
+                                            <button @click="approve(v.id)" class="action-btn approve">
+                                                Setujui
+                                            </button>
+                                            <button @click="reject(v.id)" class="action-btn reject">
+                                                Tolak
+                                            </button>
+                                        </div>
+                                            <div class="input-group">
+                                                <label>Komentar Dosen</label>
+                                            <input type="text" x-model="v.komentarDosen"> <!-- Pastikan x-model benar -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                <div x-show="isEditModalOpen" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Edit Jadwal</h3>
+            <form @submit.prevent="updateJadwal">
+                <input type="hidden" x-model="editData.id">
+                
+                <!-- Tambahkan semua field yang bisa di edit -->
+                <div class="input-group">
+                    <label>Tanggal</label>
+                    <input type="date" x-model="editData.tanggal" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Waktu Mulai</label>
+                    <input type="time" x-model="editData.waktu_mulai" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Waktu Selesai</label>
+                    <input type="time" x-model="editData.waktu_selesai" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Cara Penyelenggaraan</label>
+                    <select x-model="editData.penyelenggaraan" required>
+                        <option value="Online">Online</option>
+                        <option value="Offline">Offline</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Deskripsi</label>
+                    <textarea x-model="editData.deskripsi" required></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label>Komentar Mahasiswa</label>
+                    <input type="text" x-model="editData.komentar_mahasiswa">
+                </div>
+
+                <div class="input-group">
+                    <label>Dosen Pembimbing</label>
+                    <select x-model="editData.supervisor_id" required>
+                        <template x-for="dosen in listDosen" :key="dosen.id">
+                            <option :value="dosen.id" x-text="dosen.username"></option>
+                        </template>
+                    </select>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" @click="isEditModalOpen = false" class="button cancel">
+                        Batal
+                    </button>
+                <button type="submit" class="button save">
+                    Simpan Perubahan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <script>
+        function app() {
+          const API = 'http://localhost:3000';
+            return {
+                activeTab: 'login',
+                isLoggedIn: false,
+                currentUser: null,
+                loginData: { username: '', password: '' },
+                registerData: { username: '', password: '' },
+                jadwalList: [],
+                verifList: [],
+                bimbinganList: [],
+                activePage: 'jadwal',
+                isEditModalOpen: false,
+                editData: {},
+                openEditModal(jadwal) {
+                    this.editData = { ...jadwal };
+                    this.isEditModalOpen = true;
+                },
+                jadwalForm: { 
+                    tanggal: '',
+                    waktu_mulai: '',
+                    waktu_selesai: '',
+                    status: 'Sedang Verifikasi'
+                },
+
+
+                async login() {
+                        try {
+                        const response = await axios.post(`${API}/login`, this.loginData);
+                        this.isLoggedIn = true;
+                        this.currentUser = response.data.user;
+                        await this.loadJadwal();
+
+                        if(this.currentUser.role === 'mahasiswa') {
+                            const resp = await axios.get(`${API}/dosen`);
+                            this.listDosen = resp.data;
+                        }
+                        if(this.currentUser.role === 'dosen') {
+                            await this.loadVerifikasi();
+                            await this.loadBimbingan();
+                        }
+                        } catch (error) {
+                        alert('Login gagal!');
+                        }
+                    },
+
+                async register() {
+                    try {
+                        // Ganti dengan API register sebenarnya
+                        await axios.post(`${API}/register`, this.registerData);
+                        alert('Registrasi berhasil! Silakan login');
+                        this.activeTab = 'login';
+                        this.registerData = { username: '', password: '' };
+                    } catch (error) {
+                        alert('Registrasi gagal!');
+                    }
+                },
+
+                async buatJadwal() {
+                  try {
+                    await axios.post(`${API}/jadwal`, {
+                      ...this.jadwalForm,
+                        userId: this.currentUser.id,
+                        penyelenggaraan: this.jadwalForm.penyelenggaraan,
+                        supervisor_id: this.jadwalForm.supervisor_id
+                    });
+                    alert('Jadwal berhasil dibuat!');
+                  } catch (error) {
+                    console.error(error);
+                    alert(`Gagal membuat jadwal: ${error.response?.data || error.message}`);
+                  }
+                },
+
+                async loadJadwal() {
+                const response = await axios.get(`${API}/jadwal`, {
+                    params: { 
+                    userId: this.currentUser.id,
+                    sort: 'tanggal_asc' // Tambahkan parameter sorting di backend
+                    }
+                });
+                this.jadwalList = response.data.sort((a, b) => 
+                    new Date(a.tanggal) - new Date(b.tanggal)
+                );
+                },
+
+                async loadVerifikasi() {
+                const resp = await axios.get(`${API}/verifikasi`, {
+                    params: { dosenId: this.currentUser.id }
+                });
+                this.verifList = resp.data;
+                },
+
+                async loadBimbingan() {
+                const response = await axios.get(`${API}/jadwal/bimbingan`, {
+                    params: { dosenId: this.currentUser.id }
+                    });
+                    this.bimbinganList = response.data;
+                }, 
+
+                async approve(jadwalId) {
+                try {
+                    await axios.post(`${API}/verifikasi`, {
+                    jadwalId,
+                    approved: true,
+                    dosenId: this.currentUser.id, // Tambahkan dosenId
+                    komentar_dosen: this.verifList.find(v => v.id === jadwalId)?.komentarDosen || ''
+                    });
+                    await this.loadVerifikasi(); // Refresh data
+                } catch (error) {
+                    alert(`Gagal menyetujui: ${error.response?.data || error.message}`);
+                }
+                },
+
+                async reject(jadwalId) {
+                try {
+                    await axios.post(`${API}/verifikasi`, {
+                    jadwalId,
+                    approved: false,
+                    dosenId: this.currentUser.id, // Tambahkan dosenId
+                    komentar_dosen: this.verifList.find(v => v.id === jadwalId)?.komentarDosen || ''
+                    });
+                    await this.loadVerifikasi(); // Refresh data
+                } catch (error) {
+                    alert(`Gagal menolak: ${error.response?.data || error.message}`);
+                }
+                },
+
+                async updateJadwal() {
+                    try {
+                        await axios.put(`${API}/jadwal/${this.editData.id}`, {
+                            userId: this.currentUser.id,
+                            tanggal: this.editData.tanggal,
+                            waktu_mulai: this.editData.waktu_mulai,
+                            waktu_selesai: this.editData.waktu_selesai,
+                            penyelenggaraan: this.editData.penyelenggaraan,
+                            deskripsi: this.editData.deskripsi,
+                            komentar_mahasiswa: this.editData.komentar_mahasiswa,
+                            supervisor_id: this.editData.supervisor_id
+                        });
+                        await this.loadJadwal();
+                        this.isEditModalOpen = false;
+                        alert('Berhasil update!');
+                    } catch (error) {
+                        alert(`Gagal: ${error.response?.data || error.message}`);
+                    }
+                },
+
+                async deleteJadwal(jadwalId) {
+                    if (!confirm('Yakin ingin menghapus?')) return;
+                    
+                    try {
+                    await axios.delete(`${API}/jadwal/${jadwalId}`, {
+                        data: { userId: this.currentUser.id }
+                    });
+                    await this.loadJadwal();
+                    alert('Jadwal dihapus!');
+                    } catch (error) {
+                    alert(`Gagal: ${error.response?.data || error.message}`);
+                    }
+                },
+
+
+                logout() {
+                    this.isLoggedIn = false;
+                    this.currentUser = null;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
