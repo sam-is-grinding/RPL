@@ -83,7 +83,12 @@
                             <button
                                 @click="currentUser.role === 'mahasiswa' ? activePage = 'buat-jadwal' : activePage = 'verifikasi'"
                                 class="nav-button"
-                                :class="{ 'active-nav': activePage === 'buat-jadwal' || activePage === 'verifikasi' }">
+                                :class="{
+                                    'active-nav': activePage !== '' && (
+                                        (activePage === 'buat-jadwal') || 
+                                        (activePage === 'verifikasi')
+                                    )
+                                }">
                                 <span
                                     x-text="currentUser.role === 'mahasiswa' ? '✏️ Buat Jadwal' : '✅ Verifikasi'"></span>
                             </button>
@@ -328,7 +333,7 @@
                 verifList: [],
                 bimbinganList: [],
                 listDosen: [],
-                activePage: 'jadwal',
+                activePage: '',
                 isEditModalOpen: false,
                 editData: {},
                 formatDate(isoString) {
@@ -363,12 +368,10 @@
                         if (this.currentUser.role === 'mahasiswa') {
                             const resp = await axios.get(`${API}/dosen`);
                             this.listDosen = resp.data;
-                            this.activePage = 'jadwal';
                         }
                         if (this.currentUser.role === 'dosen') {
                             await this.loadVerifikasi();
                             await this.loadBimbingan();
-                            this.activePage = 'bimbingan';
                         }
                     } catch (error) {
                         alert('Login gagal!');
@@ -503,6 +506,7 @@
                 logout() {
                     this.isLoggedIn = false;
                     this.currentUser = null;
+                    this.activePage = '';
                 }
             }
         }
