@@ -57,12 +57,14 @@ Repositori ini berisi aplikasi full-stack sederhana menggunakan **Node.js**, **E
 
    SET GLOBAL event_scheduler = ON;
 
-   -- Event untuk menghapus jadwal kadaluarsa
-   CREATE EVENT IF NOT EXISTS hapus_jadwal_kadaluarsa
-   ON SCHEDULE EVERY 1 DAY
-   STARTS CURRENT_TIMESTAMP + INTERVAL 1 DAY
-   DO
-   DELETE FROM jadwal WHERE tanggal < CURDATE();
+  -- Event untuk menghapus jadwal kadaluarsa
+  CREATE EVENT IF NOT EXISTS hapus_jadwal_kadaluarsa
+  ON SCHEDULE EVERY 1 DAY
+  STARTS CURRENT_TIMESTAMP + INTERVAL 1 DAY
+  DO
+  BEGIN
+    DELETE FROM jadwal WHERE tanggal < CURDATE();
+  END;
 
 ## 2. Sesuaikan Kode
 Buka file index.js dan atur konfigurasi koneksi database sesuai host/user/password/database:
