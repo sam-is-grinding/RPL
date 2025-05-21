@@ -246,7 +246,6 @@ app.get('/dosen/bimbingan', isAuthenticated, async (req, res) => {
 			[userId],
 		);
 
-		console.log(bimbingans);
 		res.render('dosen/bimbingan', {
 			initialData: JSON.stringify({
 				currentUser: req.session.user,
