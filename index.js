@@ -51,10 +51,10 @@ app.get('/auth', (req, res) => {
 	}
 
 	res.render('auth', {
-		activeTab: 'login',
-		error: req.query.error,
+		username: req.query.uname || '',
+		activeTab: req.query.activeTab || 'login',
+		error: req.query.error || null,
         success: null,
-        formData: req.body
     });
 });
 
@@ -66,6 +66,10 @@ app.get('/login', (req, res) => {
 	return res.redirect('/auth');
 });
 
+app.get('/register', (req, res) => {
+	return res.redirect('/auth');
+});
+
 
 // REGISTER
 app.post('/register', async (req, res) => {
@@ -73,16 +77,23 @@ app.post('/register', async (req, res) => {
 
 	try {
 		const hashedPassword = await bcrypt.hash(password, 8);
-		pool.query(
+		await pool.query(
 			'INSERT INTO users (username, password, role) VALUES (?, ?, ?)',
-			[username, hashedPassword, role || 'mahasiswa'],
-			(error, results) => {
-				if (error) return res.status(400).send('Username sudah dipakai');
-				res.send({ status: 'success', userId: results.insertId });
-			}
+			[username, hashedPassword, role || 'mahasiswa']
 		);
+
+		res.render('auth', {
+			activeTab: 'login',
+			success: 'Registrasi berhasil. Silakan login',
+		});
+
 	} catch (error) {
-		res.status(500).send('Server error');
+		if (error.code === 'ER_DUP_ENTRY') {
+			return res.redirect('/auth?error=Username sudah digunakan&activeTab=register');
+		}
+
+		console.error('Error saat register:', error);
+		return res.status(500).send('Server error');
 	}
 });
 
@@ -99,7 +110,7 @@ app.post('/login', async (req, res) => {
         );
 
         if (users.length === 0) {
-            return res.status(400).send('Username tidak ditemukan');
+			return res.redirect('/auth?error=Username tidak ditemukan&activeTab=login');
         }
 
         const user = users[0];
@@ -107,7 +118,7 @@ app.post('/login', async (req, res) => {
         // 2. Bandingin pw
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(400).send('Password salah');
+			return res.redirect(`/auth?error=Password salah&activeTab=login&uname=${encodeURIComponent(username)}`);
         }
 
         // 3. Set session

@@ -1,72 +1,91 @@
-<!DOCTYPE html>
-<html lang="id">
+    <!DOCTYPE html>
+    <html lang="id">
 
-<head>
-    <script src="https://unpkg.com/alpinejs" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <link rel="stylesheet" href="/styles.css">
-    <title>Halaman Auth</title>
-    <style>
-        [x-cloak] { display: none !important; }
-    </style>
-</head>
+    <head>
+        <script src="https://unpkg.com/alpinejs" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <link rel="stylesheet" href="/styles.css">
+        <title>Halaman Auth</title>
+        <style>
+            [x-cloak] { display: none !important; }
+        </style>
+    </head>
 
-<body>
-    <div x-data="app()" x-cloak>
-        <!-- Halaman Auth -->
-        <div class="container">
-            <div class="auth-box">
-                <div class="tab-switcher">
-                    <button class="tab-button" :class="activeTab === 'login' ? 'active' : ''"
-                        @click="activeTab = 'login'">
-                        Login
-                    </button>
-                    <button class="tab-button" :class="activeTab === 'register' ? 'active' : ''"
-                        @click="activeTab = 'register'">
-                        Register
-                    </button>
+    <body>
+        <div x-data="app()" x-cloak>
+            <!-- Halaman Auth -->
+            <div class="container">
+            <% if (typeof success !=='undefined' && success) { %>
+                <div>
+                    <p>
+                        <%= success %>
+                    </p>
                 </div>
-
-                <!-- Form Login -->
-		        <form x-show="activeTab === 'login'" action="/login" method="POST">
-
-                    <div class="input-group">
-                        <label>ID Perguruan</label>
-                        <input type="text" name="username" required>
+            <% } %>
+            <% if (typeof error !=='undefined' && error) { %>
+                <div>
+                    <p>
+                        <%= error %>
+                    </p>
+                </div>
+            <% } %>
+            </div>
+            <div class="container">
+            
+                <div class="auth-box">
+                    <div class="tab-switcher">
+                        <button class="tab-button" :class="activeTab === 'login' ? 'active' : ''"
+                            @click="activeTab = 'login'">
+                            Login
+                        </button>
+                        <button class="tab-button" :class="activeTab === 'register' ? 'active' : ''"
+                            @click="activeTab = 'register'">
+                            Register
+                        </button>
                     </div>
 
-                    <div class="input-group">
-                        <label>Password</label>
-                        <input type="password" name="password" required>
-                    </div>
+                    <!-- Form Login -->
+                    <form x-show="activeTab === 'login'" action="/login" method="POST">
 
-                    <button type="submit" class="button">Masuk</button>
-                </form>
+                        <div class="input-group">
+                            <label>ID Perguruan</label>
+                            <input type="text" name="username" x-model="username" required>
+                        </div>
 
-                <!-- Form Register -->
-                <form x-show="activeTab === 'register'" @submit.prevent="register">
-                    <div class="input-group">
-                        <label>ID Perguruan</label>
-                        <input type="text" name="username" required>
-                    </div>
+                        <div class="input-group">
+                            <label>Password</label>
+                            <input type="password" name="password" x-model="password" required>
+                        </div>
 
-                    <div class="input-group">
-                        <label>Password</label>
-                        <input type="password" name="password" required>
-                    </div>
+                        <button type="submit" class="button">Masuk</button>
+                    </form>
 
-                    <button type="submit" class="button">Daftar</button>
-                </form>
+                    <!-- Form Register -->
+                    <form x-show="activeTab === 'register'" action="/register" method="POST">
+                        <div class="input-group">
+                            <label>ID Perguruan</label>
+                            <input type="text" name="username" x-model="username" required>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Password</label>
+                            <input type="password" name="password" x-model="password" required>
+                        </div>
+
+                        <button type="submit" class="button">Daftar</button>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
 
-    <script>
-        function app() {
-            return {
-                activeTab: 'login',//'<%= typeof activeTab !== "undefined" ? activeTab : "login" %>',
+        <script>
+            function app() {
+                return {
+                    activeTab: '<%= typeof activeTab !== "undefined" ? activeTab : "login" %>',
+                    username: '<%= typeof username !== "undefined" ? username : "" %>',
+                    password: '',
+                }
             }
-        }
-    </script>
-</body>
-</html>
+        </script>
+    </body>
+    </html>
