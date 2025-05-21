@@ -30,7 +30,7 @@ Repositori ini berisi aplikasi full-stack sederhana menggunakan **Node.js**, **E
 3. Import **DDL** berikut ke dalam database tersebut:  
 
 ```sql
--- Tabel user sederhana
+-- Tabel user sederhana	
 CREATE TABLE IF NOT EXISTS users (
 	id INT PRIMARY KEY AUTO_INCREMENT,
 	username VARCHAR(50) UNIQUE,
@@ -82,7 +82,7 @@ const pool = mysql.createPool({
 
 ```
 ## 3. Install Dependencies
-Di terminal VScode projek run `npm install axios bcrypt cors express mysql2 dotenv`
+Di terminal VScode projek run `npm install axios bcrypt cors express mysql2 dotenv express-session path`
 
 ## 4. Jalankan Aplikasi
 DI terminal VScode projek run `node index.js` lalu jika sudah menginstall Live Server, pada bawah kanan VScode klik `Go Live`
