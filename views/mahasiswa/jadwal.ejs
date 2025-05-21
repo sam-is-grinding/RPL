@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="/styles.css">
+    <title>Halaman Mahasiswa</title>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+
+<body>
+    <div x-data="app()" x-cloak>
+        <!-- Header Navigasi -->
+        <div class="header">
+            <div class="nav-container">
+                <h2>IPB University - Sistem Bimbingan</h2>
+                <div class="nav-menu">
+                    <a href="/mahasiswa/dashboard" class="nav-button active-nav">
+                        📅 Jadwal Saya
+                    </a>
+
+                    <a href="/mahasiswa/buat" class="nav-button">
+                        ✏️ Buat Jadwal
+                    </a>
+
+                    <a href="/logout" class="nav-button logout-btn">
+                        🔒 Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Konten Utama -->
+        <div class="container">
+            <div class="main-container">
+                <!-- Halaman Jadwal Mahasiswa -->
+                <h3 class="section-title">Jadwal Saya</h3>
+                <div class="jadwal-container">
+                    <template x-for="j in jadwalList" :key="j.id">
+                        <div class="jadwal-card">
+                            <div class="jadwal-header">
+                                <h4>Jadwal Bimbingan</h4>
+                                <span class="status-badge" :class="j.status.toLowerCase()"
+                                    x-text="j.status"></span>
+                            </div>
+                            <div class="action-buttons">
+                                <button x-show="j.status === 'Sedang Verifikasi'" @click="openEditModal(j)"
+                                    class="action-btn edit-btn">
+                                    ✏️ Edit
+                                </button>
+
+                                <button x-show="j.status === 'Sedang Verifikasi'" @click="deleteJadwal(j.id)"
+                                    class="action-btn delete-btn">
+                                    🗑️ Hapus
+                                </button>
+                            </div>
+                            <div class="jadwal-content">
+                                <div class="jadwal-time">
+                                    <span class="date"
+                                        x-text="new Date(j.tanggal).toLocaleDateString('id-ID')"></span>
+                                    <span class="time" x-text="j.waktu_mulai + ' - ' + j.waktu_selesai"></span>
+                                </div>
+                            </div>
+                            <div class="jadwal-meta">
+                                <span x-text="'Cara: ' + j.penyelenggaraan"></span>
+                                <p x-text="'Deskripsi: ' + j.deskripsi"></p>
+                                <p x-text="'Komentar: ' + (j.komentar_mahasiswa || '')"></p>
+                                <p x-text="'Catatan Dosen: ' + (j.komentar_dosen || '')"></p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="isEditModalOpen" class="modal-overlay">
+            <div class="modal-content">
+                <h3>Edit Jadwal</h3>
+                <form @submit.prevent="updateJadwal">
+                    <input type="hidden" x-model="editData.id">
+
+                    <!-- Tambahkan semua field yang bisa di edit -->
+                    <div class="input-group">
+                        <label>Tanggal</label>
+                        <input type="date" x-model="editData.tanggal" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Waktu Mulai</label>
+                        <input type="time" x-model="editData.waktu_mulai" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Waktu Selesai</label>
+                        <input type="time" x-model="editData.waktu_selesai" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Cara Penyelenggaraan</label>
+                        <select x-model="editData.penyelenggaraan" required>
+                            <option value="Online">Online</option>
+                            <option value="Offline">Offline</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Deskripsi</label>
+                        <textarea x-model="editData.deskripsi" required></textarea>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Komentar Mahasiswa</label>
+                        <input type="text" x-model="editData.komentar_mahasiswa">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Dosen Pembimbing</label>
+                        <select x-model="editData.supervisor_id" required>
+                            <template x-for="dosen in listDosen" :key="dosen.id">
+                                <option :value="dosen.id" x-text="dosen.username"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" @click="isEditModalOpen = false" class="button cancel">
+                            Batal
+                        </button>
+                        <button type="submit" class="button save">
+                            Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function app() {
+            return {
+                currentUser: JSON.parse('<%- initialData %>').currentUser,
+                jadwalList: JSON.parse('<%- initialData %>').jadwalList || [],
+                listDosen: JSON.parse('<%- initialData %>').listDosen || [],
+                editData: {},
+                isEditModalOpen: false,
+                
+                formatDate(isoString) {
+                    const date = new Date(isoString);
+                    const localDate = date.toLocaleDateString('id-ID', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                    });
+                    const [day, month, year] = localDate.split('/');
+                    return `${year}-${month}-${day}`;
+                },
+                openEditModal(jadwal) {
+                    this.editData = { ...jadwal };
+                    this.editData.tanggal = this.formatDate(jadwal.tanggal); // formatnya kyk '2025-05-07T17:00:00.000Z' diubah jadi 2025-05-08
+                    this.isEditModalOpen = true;
+                },
+
+                async loadJadwal() {
+                    try {
+                        const response = await axios.get('/jadwal', {
+                            params: {
+                                userId: this.currentUser.id,
+                                sort: 'tanggal_asc',
+                            }
+                        });
+                        
+                        this.jadwalList = response.data;
+
+                    } catch (error) {
+                        console.error('Error loading jadwal:', error);
+                        alert('Gagal memuat jadwal: ' + (error.response?.data?.error || error.message));
+                    }
+                },
+                                
+                async updateJadwal() {
+                    try {
+                        await axios.put(`/jadwal/${this.editData.id}`, {
+                            userId: this.currentUser.id,
+                            tanggal: this.editData.tanggal,
+                            waktu_mulai: this.editData.waktu_mulai,
+                            waktu_selesai: this.editData.waktu_selesai,
+                            penyelenggaraan: this.editData.penyelenggaraan,
+                            deskripsi: this.editData.deskripsi,
+                            komentar_mahasiswa: this.editData.komentar_mahasiswa,
+                            supervisor_id: this.editData.supervisor_id
+                        });
+                        await this.loadJadwal();
+                        this.isEditModalOpen = false;
+                        alert('Berhasil update!');
+                    } catch (error) {
+                        alert(`Gagal: ${error.response?.data || error.message}`);
+                    }
+                },
+
+                async deleteJadwal(jadwalId) {
+                    if (!confirm('Yakin ingin menghapus?')) return;
+
+                    try {
+                        await axios.delete(`/jadwal/${jadwalId}`, {
+                            data: { userId: this.currentUser.id }
+                        });
+                        await this.loadJadwal();
+                        alert('Jadwal dihapus!');
+                    } catch (error) {
+                        alert(`Gagal: ${error.response?.data || error.message}`);
+                    }
+                },
+            }
+        }
+    </script>
+</body>
+</html>

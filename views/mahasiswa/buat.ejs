@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="/styles.css">
+    <title>Halaman Mahasiswa</title>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+
+<body>
+    <div x-data="app()" x-cloak>
+        <!-- Header Navigasi -->
+        <div class="header">
+            <div class="nav-container">
+                <h2>IPB University - Sistem Bimbingan</h2>
+                <div class="nav-menu">
+                    <a href="/mahasiswa/jadwal" class="nav-button">
+                        📅 Jadwal Saya
+                    </a>
+
+                    <a href="/mahasiswa/dashboard" class="nav-button active-nav">
+                        ✏️ Buat Jadwal
+                    </a>
+
+                    <a href="/logout" class="nav-button logout-btn">
+                        🔒 Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Konten Utama -->
+        <div class="container">
+            <!-- Halaman Buat Jadwal -->
+            <form @submit.prevent="buatJadwal">
+                <div class="input-group">
+                    <label>Tanggal</label>
+                    <input type="date" x-model="jadwalForm.tanggal" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Waktu Mulai</label>
+                    <input type="time" x-model="jadwalForm.waktu_mulai" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Waktu Selesai</label>
+                    <input type="time" x-model="jadwalForm.waktu_selesai" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Cara Penyelenggaraan</label>
+                    <select x-model="jadwalForm.penyelenggaraan" required>
+                        <option value="" disabled selected>Pilih penyele...</option>
+                        <option value="Online">Online</option>
+                        <option value="Offline">Offline</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Deskripsi</label>
+                    <textarea x-model="jadwalForm.deskripsi" required></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label>Komentar Mahasiswa</label>
+                    <input type="text" x-model="jadwalForm.komentar_mahasiswa">
+                </div>
+
+                <div class="input-group">
+                    <label>Pilih Dosen Pembimbing</label>
+                    <select x-model="jadwalForm.supervisor_id" required>
+                        <option value="" disabled selected>Pilih Dosen...</option>
+                        <template x-for="dosen in listDosen" :key="dosen.id">
+                            <option :value="dosen.id" x-text="dosen.username"></option>
+                        </template>
+                    </select>
+                </div>
+
+                <button type="submit" class="button">Buat Jadwal</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function app() {
+            return {
+                currentUser: JSON.parse('<%- initialData %>').currentUser,
+                listDosen: JSON.parse('<%- initialData %>').listDosen || [],
+                jadwalForm: {
+                    tanggal: '',
+                    waktu_mulai: '',
+                    waktu_selesai: '',
+                    status: 'Sedang Verifikasi'
+                },
+
+                async buatJadwal() {
+                    try {
+                        await axios.post('/jadwal', {
+                            ...this.jadwalForm,
+                            userId: this.currentUser.id,
+                            penyelenggaraan: this.jadwalForm.penyelenggaraan,
+                            supervisor_id: this.jadwalForm.supervisor_id
+                        });
+                        alert('Jadwal berhasil dibuat!');
+                        this.jadwalForm = { // reset input jadwal
+                            tanggal: '',
+                            waktu_mulai: '',
+                            waktu_selesai: '',
+                            status: 'Sedang Verifikasi'
+                        };
+                        await this.loadJadwal();
+                    } catch (error) {
+                        console.error(error);
+                        alert(`Gagal membuat jadwal: ${error.response?.data || error.message}`);
+                    }
+                },
+                
+                async loadJadwal() {
+                    try {
+                        const response = await axios.get('/jadwal', {
+                            params: {
+                                userId: this.currentUser.id,
+                                sort: 'tanggal_asc',
+                            }
+                        });
+                        
+                        // Jika backend sudah handle sorting, tidak perlu sort di frontend
+                        this.jadwalList = response.data;
+
+                    } catch (error) {
+                        console.error('Error loading jadwal:', error);
+                        alert('Gagal memuat jadwal: ' + (error.response?.data?.error || error.message));
+                    }
+                },
+            }
+        }
+    </script>
+</body>
+</html>

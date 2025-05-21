@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="/styles.css">
+    <title>Halaman Dosen</title>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+
+<body>
+    <div x-data="app()" x-cloak>
+        <!-- Header Navigasi -->
+        <div class="header">
+            <div class="nav-container">
+                <h2>IPB University - Sistem Bimbingan</h2>
+                <div class="nav-menu">
+                    <a href="/dosen/bimbingan" class="nav-button">
+                        👥 Bimbingan Saya
+                    </a>
+
+                    <a href="/dosen/verifikasi" class="nav-button">
+                        ✅ Verifikasi
+                    </a>
+
+                    <a href="/logout" class="nav-button logout-btn">
+                        🔒 Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Konten Utama -->
+        <div class="container">
+            <div class="main-container">
+                <h3 class="section-title">Halo om~</h3>
+            </div>
+        </div>
+    </div>
+
+       <script>
+        function app() {
+            return {
+                currentUser: JSON.parse('<%- initialData %>').currentUser,
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="/styles.css">
+    <title>Halaman Dosen</title>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+
+<body>
+    <div x-data="app()" x-cloak>
+        <!-- Header Navigasi -->
+        <div class="header">
+            <div class="nav-container">
+                <h2>IPB University - Sistem Bimbingan</h2>
+                <div class="nav-menu">
+                    <a href="/dosen/dashboard" class="nav-button active-nav">
+                        👥 Bimbingan Saya
+                    </a>
+
+                    <a href="/dosen/verifikasi" class="nav-button">
+                        ✅ Verifikasi
+                    </a>
+
+                    <a href="/logout" class="nav-button logout-btn">
+                        🔒 Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Konten Utama -->
+        <div class="container">
+            <div class="main-container">
+                <!-- Halaman Bimbingan Dosen -->
+                <h3 class="section-title">Jadwal Mahasiswa Bimbingan</h3>
+                <div class="jadwal-container">
+                    <template x-for="b in bimbinganList" :key="b.id">
+                        <div class="jadwal-card">
+                            <div class="jadwal-header">
+                                <h4 x-text="b.mahasiswa"></h4>
+                                <span class="status-badge" x-text="b.status"></span>
+                            </div>
+                            <div class="jadwal-content">
+                                <div class="jadwal-time">
+                                    <span class="date"
+                                        x-text="new Date(b.tanggal).toLocaleDateString('id-ID')"></span>
+                                    <span class="time" x-text="b.waktu_mulai + ' - ' + b.waktu_selesai"></span>
+                                </div>
+                                <div class="jadwal-meta">
+                                    <!-- Perbaiki field penyelenggaraan -->
+                                    <span x-text="'Cara: ' + b.penyelenggaraan"></span>
+                                    <p x-text="'Deskripsi: ' + b.deskripsi"></p>
+                                    <p x-text="'Komentar: ' + (b.komentar_mahasiswa || '-')"></p>
+                                    <p x-text="'Catatan Dosen: ' + (b.komentar_dosen || '-')"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function app() {
+            return {
+                currentUser: JSON.parse('<%- initialData %>').currentUser,
+                bimbinganList: JSON.parse('<%- initialData %>').bimbinganList || [],
+            }
+        }
+    </script>
+</body>
+</html>

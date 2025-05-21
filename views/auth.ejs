@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="/styles.css">
+    <title>Halaman Auth</title>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+
+<body>
+    <div x-data="app()" x-cloak>
+        <!-- Halaman Auth -->
+        <div class="container">
+            <div class="auth-box">
+                <div class="tab-switcher">
+                    <button class="tab-button" :class="activeTab === 'login' ? 'active' : ''"
+                        @click="activeTab = 'login'">
+                        Login
+                    </button>
+                    <button class="tab-button" :class="activeTab === 'register' ? 'active' : ''"
+                        @click="activeTab = 'register'">
+                        Register
+                    </button>
+                </div>
+
+                <!-- Form Login -->
+		        <form x-show="activeTab === 'login'" action="/login" method="POST">
+
+                    <div class="input-group">
+                        <label>ID Perguruan</label>
+                        <input type="text" name="username" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" name="password" required>
+                    </div>
+
+                    <button type="submit" class="button">Masuk</button>
+                </form>
+
+                <!-- Form Register -->
+                <form x-show="activeTab === 'register'" @submit.prevent="register">
+                    <div class="input-group">
+                        <label>ID Perguruan</label>
+                        <input type="text" name="username" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" name="password" required>
+                    </div>
+
+                    <button type="submit" class="button">Daftar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function app() {
+            return {
+                activeTab: 'login',//'<%= typeof activeTab !== "undefined" ? activeTab : "login" %>',
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="/styles.css">
+    <title>Halaman Dosen</title>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+
+<body>
+    <div x-data="app()" x-cloak>
+        <!-- Header Navigasi -->
+        <div class="header">
+            <div class="nav-container">
+                <h2>IPB University - Sistem Bimbingan</h2>
+                <div class="nav-menu">
+                    <a href="/dosen/bimbingan" class="nav-button">
+                        👥 Bimbingan Saya
+                    </a>
+
+                    <a href="/dosen/dashboard" class="nav-button active-nav">
+                        ✅ Verifikasi
+                    </a>
+
+                    <a href="/logout" class="nav-button logout-btn">
+                        🔒 Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Konten Utama -->
+        <div class="container">
+            <div class="main-container">
+                <!-- Halaman Verifikasi Dosen -->
+                <h3 class="section-title">Verifikasi Jadwal</h3>
+                <div class="verifikasi-container">
+                    <template x-for="v in verifList" :key="v.id">
+                        <div class="verif-card">
+                            <div class="verif-header">
+                                <h4 x-text="v.mahasiswa"></h4>
+                            </div>
+                            <div class="verif-content">
+                                <div class="verif-time">
+                                    <span x-text="new Date(v.tanggal).toLocaleDateString('id-ID')"></span>
+                                    <span x-text="v.waktu_mulai + ' - ' + v.waktu_selesai"></span>
+                                </div>
+                                <div class="action-buttons">
+                                    <button @click="approve(v.id)" class="action-btn approve">
+                                        Setujui
+                                    </button>
+                                    <button @click="reject(v.id)" class="action-btn reject">
+                                        Tolak
+                                    </button>
+                                </div>
+                                <div class="input-group">
+                                    <label>Komentar Dosen</label>
+                                    <input type="text" x-model="v.komentarDosen">
+                                    <!-- Pastikan x-model benar -->
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function app() {
+            return {
+                currentUser: JSON.parse('<%- initialData %>').currentUser,
+                verifList: JSON.parse('<%- initialData %>').verifList || [],
+
+                async loadVerifikasi() {
+                    const resp = await axios.get('/verifikasi', {
+                        params: { userId: this.currentUser.id }
+                    });
+                    this.verifList = resp.data;
+                },
+
+                async approve(jadwalId) {
+                    try {
+                        await axios.post('/verifikasi', {
+                            jadwalId,
+                            approved: true,
+                            dosenId: this.currentUser.id, // Tambahkan dosenId
+                            komentar_dosen: this.verifList.find(v => v.id === jadwalId)?.komentarDosen || ''
+                        });
+                        alert('Jadwal berhasil disetujui.');
+                        await this.loadVerifikasi();
+                    } catch (error) {
+                        alert(`Gagal menyetujui: ${error.response?.data || error.message}`);
+                    }
+                },
+
+                async reject(jadwalId) {
+                    try {
+                        await axios.post('/verifikasi', {
+                            jadwalId,
+                            approved: false,
+                            dosenId: this.currentUser.id, // Tambahkan dosenId
+                            komentar_dosen: this.verifList.find(v => v.id === jadwalId)?.komentarDosen || ''
+                        });
+                        alert('Jadwal berhasil ditolak.');
+                        await this.loadVerifikasi();
+                    } catch (error) {
+                        alert(`Gagal menolak: ${error.response?.data || error.message}`);
+                    }
+                },
+            }
+        }
+    </script>
+</body>
+</html>
