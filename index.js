@@ -488,10 +488,10 @@ app.put('/jadwal/:id', async (req, res) => {
             values
         );
 
-        // res.json({ 
-        //     status: 'success',
-        //     message: 'Jadwal berhasil diperbarui'
-        // });
+        res.json({ 
+            status: 'success',
+            message: 'Jadwal berhasil diperbarui'
+        });
 
     } catch (error) {
         console.error('Error:', error);
@@ -615,22 +615,22 @@ app.post('/verifikasi', async (req, res) => {
 
 
 // GET /jadwal/bimbingan
-app.get('/jadwal/bimbingan', (req, res) => {
-	const dosenId = req.query.dosenId;
+// app.get('/jadwal/bimbingan', (req, res) => {
+// 	const dosenId = req.query.dosenId;
 
-	pool.query(
-		`SELECT j.*, u.username AS mahasiswa 
-     FROM jadwal j
-     JOIN users u ON j.user_id = u.id
-     WHERE j.supervisor_id = ?  -- Filter berdasarkan dosen
-     ORDER BY j.tanggal ASC, j.waktu_mulai ASC`,
-		[dosenId], // Gunakan dosenId dari parameter
-		(err, results) => {
-			if (err) return res.status(500).send('DB error');
-			res.send(results);
-		}
-	);
-});
+// 	pool.query(
+// 		`SELECT j.*, u.username AS mahasiswa 
+//      FROM jadwal j
+//      JOIN users u ON j.user_id = u.id
+//      WHERE j.supervisor_id = ?  -- Filter berdasarkan dosen
+//      ORDER BY j.tanggal ASC, j.waktu_mulai ASC`,
+// 		[dosenId], // Gunakan dosenId dari parameter
+// 		(err, results) => {
+// 			if (err) return res.status(500).send('DB error');
+// 			res.send(results);
+// 		}
+// 	);
+// });
 
 // // GET /dosen
 // app.get('/dosen', (req, res) => {
