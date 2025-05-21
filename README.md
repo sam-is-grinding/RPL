@@ -68,18 +68,14 @@ END;
 ```
 
 ## 2. Sesuaikan Kode
-Buka file index.js dan atur konfigurasi koneksi database sesuai host/user/password/database:
+Buat file .env dan atur konfigurasi koneksi database sesuai host/user/password/database:
 
-```javascript
-const pool = mysql.createPool({
-	host: 'localhost',
-	user: 'root',            // Ganti jika berbeda
-	password: 'root',        // Ganti jika berbeda
-	database: 'bimbingan_kampus', // Ganti jika berbeda
-	port: 3306, // Ganti jika berbeda
-	waitForConnections: true
-});
-
+``` env
+DB_HOST=<host>
+DB_USER=<user>
+DB_PASS=<password>
+DB_NAME=<nama database>
+DB_PORT=<port>
 ```
 ## 3. Install Dependencies
 Di terminal VScode projek run `npm install axios bcrypt cors express mysql2 dotenv express-session path`
