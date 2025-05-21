@@ -246,12 +246,23 @@ app.get('/dosen/bimbingan', isAuthenticated, async (req, res) => {
 			[userId],
 		);
 
+		// gatau kenapa tapi yaudah
+		const cleanData = {
+            bimbinganList: bimbingans.map(j => ({
+                ...j,
+                // Escape karakter khusus
+                deskripsi: j.deskripsi ? j.deskripsi.replace(/"/g, '\\"') : null,
+                komentar_dosen: j.komentar_dosen ? j.komentar_dosen.replace(/"/g, '\\"') : null
+            })),
+            currentUser: {
+                ...req.session.user,
+                // Bersihkan data user jika perlu
+            }
+        };
+
 		res.render('dosen/bimbingan', {
-			initialData: JSON.stringify({
-				bimbinganList: bimbingans || [],
-				currentUser: req.session.user,
-            })
-        });
+		initialData: JSON.stringify(cleanData)
+		});
 
     } catch (error) {
         console.error('Error fetching bimbingan:', error);
